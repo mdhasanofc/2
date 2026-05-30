@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apex Therapy — Premium Recovery Tech</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#0A0A0A;--white:#FAFAF8;--accent:#C8FF00;--accent2:#00D4FF;
+  --gray:#1A1A1A;--gray2:#2A2A2A;--gray3:#666;--gray4:#999;
+  --font-display:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;
+  --radius:12px;--radius-lg:20px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--black);color:var(--white);overflow-x:hidden}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(10,10,10,0.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.06)}
+.nav-logo{font-family:var(--font-display);font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--white)}
+.nav-logo span{color:var(--accent)}
+.nav-links{display:flex;gap:28px;list-style:none}
+.nav-links a{font-size:13px;color:var(--gray4);text-decoration:none;transition:color 0.2s;letter-spacing:0.04em;text-transform:uppercase}
+.nav-links a:hover{color:var(--white)}
+.nav-cta{background:var(--accent);color:var(--black);font-size:13px;font-weight:600;padding:8px 18px;border-radius:100px;border:none;cursor:pointer;font-family:var(--font-display);letter-spacing:0.02em;transition:all 0.2s}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(200,255,0,0.3)}
+.nav-right{display:flex;align-items:center;gap:12px}
+.cart-icon{font-size:18px;cursor:pointer;color:var(--gray4);transition:color 0.2s}
+.cart-icon:hover{color:var(--white)}
+
+/* HERO */
+.hero{min-height:100vh;padding:100px 2rem 4rem;display:flex;align-items:center;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 60% 40%,rgba(200,255,0,0.06) 0%,transparent 70%),radial-gradient(ellipse 60% 80% at 80% 80%,rgba(0,212,255,0.04) 0%,transparent 60%)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse at center,black 30%,transparent 80%)}
+.hero-inner{max-width:1200px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;position:relative;z-index:1}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(200,255,0,0.1);border:1px solid rgba(200,255,0,0.2);color:var(--accent);font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;padding:6px 14px;border-radius:100px;margin-bottom:1.5rem}
+.hero-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.4)}}
+.hero h1{font-family:var(--font-display);font-size:clamp(40px,5vw,68px);font-weight:800;line-height:1.05;letter-spacing:-0.03em;margin-bottom:1.25rem}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero p{font-size:16px;color:var(--gray4);line-height:1.7;max-width:420px;margin-bottom:2rem}
+.hero-actions{display:flex;gap:12px;align-items:center;margin-bottom:3rem}
+.btn-primary{background:var(--accent);color:var(--black);font-size:14px;font-weight:700;padding:14px 28px;border-radius:100px;border:none;cursor:pointer;font-family:var(--font-display);transition:all 0.2s;letter-spacing:0.02em}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(200,255,0,0.35)}
+.btn-ghost{background:transparent;color:var(--white);font-size:14px;font-weight:500;padding:14px 24px;border-radius:100px;border:1px solid rgba(255,255,255,0.15);cursor:pointer;font-family:var(--font-body);transition:all 0.2s;display:flex;align-items:center;gap:8px}
+.btn-ghost:hover{border-color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.05)}
+.hero-stats{display:flex;gap:2rem}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat-num{font-family:var(--font-display);font-size:24px;font-weight:800;color:var(--white)}
+.stat-label{font-size:11px;color:var(--gray4);text-transform:uppercase;letter-spacing:0.06em}
+.hero-visual{position:relative;display:flex;align-items:center;justify-content:center}
+.hero-card-main{background:var(--gray);border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius-lg);padding:2rem;width:100%;max-width:420px;position:relative;overflow:hidden}
+.hero-card-main::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top right,rgba(200,255,0,0.08),transparent 60%)}
+.hero-product-img{width:100%;height:220px;background:linear-gradient(135deg,rgba(200,255,0,0.08),rgba(0,212,255,0.08));border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:80px;margin-bottom:1.25rem;position:relative}
+.hero-product-badge{position:absolute;top:12px;right:12px;background:var(--accent);color:var(--black);font-size:11px;font-weight:700;padding:4px 10px;border-radius:100px;font-family:var(--font-display)}
+.hero-product-name{font-family:var(--font-display);font-size:18px;font-weight:700;margin-bottom:6px}
+.hero-product-price{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+.price-new{font-size:22px;font-weight:700;color:var(--accent)}
+.price-old{font-size:14px;color:var(--gray4);text-decoration:line-through}
+.hero-stars{display:flex;align-items:center;gap:6px;margin-bottom:1rem}
+.stars{color:#FFB800;font-size:13px;letter-spacing:2px}
+.stars-count{font-size:12px;color:var(--gray4)}
+.hero-add-btn{width:100%;background:var(--accent);color:var(--black);font-size:14px;font-weight:700;padding:12px;border-radius:var(--radius);border:none;cursor:pointer;font-family:var(--font-display);transition:all 0.2s}
+.hero-add-btn:hover{opacity:0.9}
+.float-badge{position:absolute;background:var(--gray2);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius);padding:10px 14px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px;backdrop-filter:blur(8px)}
+.float-badge.top-left{top:-16px;left:-20px;animation:float1 3s ease-in-out infinite}
+.float-badge.bottom-right{bottom:-16px;right:-20px;animation:float2 3s ease-in-out infinite 1.5s}
+@keyframes float1{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes float2{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+/* MARQUEE */
+.marquee-wrap{background:var(--accent);padding:12px 0;overflow:hidden}
+.marquee-track{display:flex;gap:3rem;animation:marquee 20s linear infinite;width:max-content}
+.marquee-item{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--black);text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;display:flex;align-items:center;gap:12px}
+.marquee-dot{width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.3);flex-shrink:0}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* SECTIONS */
+.section{padding:5rem 2rem;max-width:1200px;margin:0 auto}
+.section-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:3rem}
+.section-label{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.section-title{font-family:var(--font-display);font-size:clamp(28px,4vw,42px);font-weight:800;letter-spacing:-0.02em;line-height:1.1}
+.section-link{font-size:13px;color:var(--gray4);text-decoration:none;display:flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,0.1);padding:8px 16px;border-radius:100px;transition:all 0.2s;white-space:nowrap}
+.section-link:hover{color:var(--white);border-color:rgba(255,255,255,0.3)}
+
+/* PRODUCT SLIDER */
+.slider-wrap{position:relative;overflow:hidden}
+.slider-track{display:flex;gap:20px;transition:transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94);padding-bottom:4px}
+.product-card{flex:0 0 calc(25% - 15px);background:var(--gray);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);overflow:hidden;transition:all 0.3s;cursor:pointer}
+.product-card:hover{border-color:rgba(200,255,0,0.2);transform:translateY(-4px);box-shadow:0 20px 40px rgba(0,0,0,0.4)}
+.product-thumb{height:200px;display:flex;align-items:center;justify-content:center;font-size:60px;position:relative;background:linear-gradient(135deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))}
+.product-badge{position:absolute;top:12px;left:12px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;font-family:var(--font-display)}
+.badge-sale{background:rgba(255,60,60,0.9);color:#fff}
+.badge-new{background:rgba(200,255,0,0.9);color:#000}
+.badge-hot{background:rgba(255,140,0,0.9);color:#000}
+.product-wish{position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all 0.2s}
+.product-wish:hover{background:rgba(255,60,60,0.2)}
+.product-body{padding:16px}
+.product-cat{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray4);margin-bottom:6px}
+.product-name{font-family:var(--font-display);font-size:15px;font-weight:700;margin-bottom:8px;line-height:1.3}
+.product-stars{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.product-stars .stars{font-size:11px}
+.product-stars span{font-size:11px;color:var(--gray4)}
+.product-footer{display:flex;align-items:center;justify-content:space-between}
+.product-price{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--accent)}
+.product-price-old{font-size:12px;color:var(--gray4);text-decoration:line-through;margin-left:6px;font-weight:400}
+.product-add{background:rgba(200,255,0,0.1);color:var(--accent);border:1px solid rgba(200,255,0,0.2);font-size:12px;font-weight:600;padding:7px 14px;border-radius:100px;cursor:pointer;font-family:var(--font-display);transition:all 0.2s}
+.product-add:hover{background:var(--accent);color:var(--black)}
+.slider-nav{display:flex;gap:10px;justify-content:center;margin-top:2rem}
+.slider-btn{width:42px;height:42px;border-radius:50%;background:var(--gray2);border:1px solid rgba(255,255,255,0.1);color:var(--white);font-size:16px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center}
+.slider-btn:hover{background:var(--accent);color:var(--black);border-color:var(--accent)}
+
+/* FEATURES */
+.features-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding:3rem 2rem;max-width:1200px;margin:0 auto}
+.feature-card{background:var(--gray);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);padding:1.75rem;transition:all 0.3s}
+.feature-card:hover{border-color:rgba(200,255,0,0.15);transform:translateY(-3px)}
+.feature-icon{width:48px;height:48px;border-radius:12px;background:rgba(200,255,0,0.08);border:1px solid rgba(200,255,0,0.15);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:1rem}
+.feature-title{font-family:var(--font-display);font-size:15px;font-weight:700;margin-bottom:6px}
+.feature-desc{font-size:13px;color:var(--gray4);line-height:1.6}
+
+/* REVIEWS */
+.reviews-section{background:var(--gray);padding:5rem 2rem;margin:2rem 0}
+.reviews-inner{max-width:1200px;margin:0 auto}
+.reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:3rem}
+.review-card{background:var(--black);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);padding:1.5rem;transition:all 0.3s}
+.review-card:hover{border-color:rgba(200,255,0,0.1)}
+.review-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem}
+.reviewer-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--black);font-family:var(--font-display);flex-shrink:0}
+.reviewer-name{font-weight:600;font-size:14px;margin-bottom:2px}
+.reviewer-date{font-size:11px;color:var(--gray4)}
+.review-stars{color:#FFB800;font-size:13px;margin-bottom:10px}
+.review-text{font-size:13px;color:var(--gray4);line-height:1.65}
+.review-product{display:inline-flex;align-items:center;gap:6px;background:rgba(200,255,0,0.06);border:1px solid rgba(200,255,0,0.1);color:var(--accent);font-size:10px;font-weight:600;padding:3px 10px;border-radius:100px;margin-top:10px;letter-spacing:0.06em;text-transform:uppercase}
+.overall-rating{display:flex;align-items:center;gap:2rem;background:var(--black);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);padding:2rem;margin-bottom:3rem}
+.big-rating{font-family:var(--font-display);font-size:64px;font-weight:800;color:var(--accent);line-height:1}
+.rating-details{flex:1}
+.rating-stars-big{color:#FFB800;font-size:20px;margin-bottom:4px}
+.rating-count{font-size:13px;color:var(--gray4)}
+.rating-bars{flex:2;display:flex;flex-direction:column;gap:6px}
+.rating-bar-row{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--gray4)}
+.rating-bar-track{flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:100px;overflow:hidden}
+.rating-bar-fill{height:100%;border-radius:100px;background:var(--accent)}
+
+/* CONTACT */
+.contact-section{padding:5rem 2rem;max-width:1200px;margin:0 auto}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start}
+.contact-info{display:flex;flex-direction:column;gap:1.5rem}
+.contact-item{display:flex;align-items:flex-start;gap:14px}
+.contact-icon{width:42px;height:42px;border-radius:10px;background:rgba(200,255,0,0.08);border:1px solid rgba(200,255,0,0.15);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.contact-label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--gray4);margin-bottom:3px}
+.contact-value{font-size:14px;font-weight:500}
+.contact-form{background:var(--gray);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);padding:2rem;display:flex;flex-direction:column;gap:16px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:12px;font-weight:500;color:var(--gray4);letter-spacing:0.04em;text-transform:uppercase}
+.form-input{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius);padding:12px 14px;color:var(--white);font-size:14px;font-family:var(--font-body);transition:border-color 0.2s;outline:none}
+.form-input:focus{border-color:rgba(200,255,0,0.3)}
+.form-input::placeholder{color:var(--gray3)}
+textarea.form-input{min-height:120px;resize:vertical}
+.submit-btn{background:var(--accent);color:var(--black);font-size:14px;font-weight:700;padding:14px;border-radius:var(--radius);border:none;cursor:pointer;font-family:var(--font-display);transition:all 0.2s}
+.submit-btn:hover{opacity:0.9;transform:translateY(-1px)}
+
+/* FOOTER */
+footer{background:var(--gray);border-top:1px solid rgba(255,255,255,0.06);padding:3rem 2rem 2rem;margin-top:2rem}
+.footer-inner{max-width:1200px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2rem;margin-bottom:3rem}
+.footer-brand p{font-size:13px;color:var(--gray4);line-height:1.65;max-width:260px;margin-top:1rem}
+.footer-title{font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:1rem;color:var(--white)}
+.footer-links{display:flex;flex-direction:column;gap:8px}
+.footer-links a{font-size:13px;color:var(--gray4);text-decoration:none;transition:color 0.2s}
+.footer-links a:hover{color:var(--accent)}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:2rem;border-top:1px solid rgba(255,255,255,0.06)}
+.footer-copy{font-size:12px;color:var(--gray4)}
+.footer-social{display:flex;gap:10px}
+.social-btn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all 0.2s;text-decoration:none;color:var(--gray4)}
+.social-btn:hover{background:var(--accent);color:var(--black);border-color:var(--accent)}
+
+@media(max-width:768px){
+  .hero-inner{grid-template-columns:1fr}
+  .hero-visual{display:none}
+  .product-card{flex:0 0 calc(80% - 10px)}
+  .features-grid{grid-template-columns:1fr 1fr}
+  .reviews-grid{grid-template-columns:1fr}
+  .contact-grid{grid-template-columns:1fr}
+  .footer-top{grid-template-columns:1fr 1fr}
+  .nav-links{display:none}
+  .form-row{grid-template-columns:1fr}
+  .overall-rating{flex-direction:column;gap:1rem}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">APEX<span>.</span>THERAPY</div>
+  <ul class="nav-links">
+    <li><a href="#">Home</a></li>
+    <li><a href="#">Products</a></li>
+    <li><a href="#">About</a></li>
+    <li><a href="#">Reviews</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+  <div class="nav-right">
+    <span class="cart-icon">🛒</span>
+    <button class="nav-cta">Shop Now</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-tag">🚀 Launch Sale — Up to 40% Off</div>
+      <h1>Recover <em>Faster.</em><br>Move <em>Better.</em><br>Feel <em>Stronger.</em></h1>
+      <p>Advanced posture correction and physical recovery technology engineered for high performance, daily comfort, and lasting pain relief.</p>
+      <div class="hero-actions">
+        <button class="btn-primary">Shop Collection →</button>
+        <button class="btn-ghost">▶ Watch Demo</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num">12K+</span><span class="stat-label">Happy Customers</span></div>
+        <div class="stat"><span class="stat-num">4.9★</span><span class="stat-label">Avg Rating</span></div>
+        <div class="stat"><span class="stat-num">98%</span><span class="stat-label">Relief Rate</span></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="float-badge top-left">⚡ Clinically Tested</div>
+      <div class="hero-card-main">
+        <div class="hero-product-img">🦾<span class="hero-product-badge">BESTSELLER</span></div>
+        <div class="hero-product-name">PostureX Pro Tracker</div>
+        <div class="hero-stars"><span class="stars">★★★★★</span><span class="stars-count">4.9 (2,847 reviews)</span></div>
+        <div class="hero-product-price"><span class="price-new">$89.99</span><span class="price-old">$149.99</span></div>
+        <button class="hero-add-btn">Add to Cart →</button>
+      </div>
+      <div class="float-badge bottom-right">✅ Free Shipping</div>
+    </div>
+  </div>
+</section>
+
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item"><span class="marquee-dot"></span>Free Worldwide Shipping</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>30-Day Money Back Guarantee</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Clinically Tested Technology</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>12,000+ Happy Customers</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Premium Recovery Gear</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Free Worldwide Shipping</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>30-Day Money Back Guarantee</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Clinically Tested Technology</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>12,000+ Happy Customers</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Premium Recovery Gear</span>
+  </div>
+</div>
+
+<div style="padding:5rem 2rem 0;max-width:1200px;margin:0 auto">
+  <div class="section-header">
+    <div><div class="section-label">Our Collection</div><div class="section-title">Featured Products</div></div>
+    <a href="#" class="section-link">View All →</a>
+  </div>
+</div>
+<div style="padding:0 2rem 5rem;max-width:1200px;margin:0 auto">
+  <div class="slider-wrap">
+    <div class="slider-track" id="sliderTrack">
+      <div class="product-card"><div class="product-thumb">🦾<span class="product-badge badge-sale">-40%</span><span class="product-wish">♡</span></div><div class="product-body"><div class="product-cat">Posture Tech</div><div class="product-name">PostureX Pro Tracker</div><div class="product-stars"><span class="stars">★★★★★</span><span>(2,847)</span></div><div class="product-footer"><div><span class="product-price">$89.99</span><span class="product-price-old">$149.99</span></div><button class="product-add">+ Add</button></div></div></div>
+      <div class="product-card"><div class="product-thumb">💆<span class="product-badge badge-new">NEW</span><span class="product-wish">♡</span></div><div class="product-body"><div class="product-cat">Recovery</div><div class="product-name">DeepRelief Massage Gun</div><div class="product-stars"><span class="stars">★★★★★</span><span>(1,203)</span></div><div class="product-footer"><div><span class="product-price">$129.99</span><span class="product-price-old">$199.99</span></div><button class="product-add">+ Add</button></div></div></div>
+      <div class="product-card"><div class="product-thumb">🩹<span class="product-badge badge-hot">HOT</span><span class="product-wish">♡</span></div><div class="product-body"><div class="product-cat">Therapy</div><div class="product-name">ThermoFlex Knee Wrap</div><div class="product-stars"><span class="stars">★★★★☆</span><span>(986)</span></div><div class="product-footer"><div><span class="product-price">$49.99</span><span class="product-price-old">$79.99</span></div><button class="product-add">+ Add</button></div></div></div>
+      <div class="product-card"><div class="product-thumb">🏋️<span class="product-badge badge-sale">-30%</span><span class="product-wish">♡</span></div><div class="product-body"><div class="product-cat">Posture Tech</div><div class="product-name">SpineAlign Support Belt</div><div class="product-stars"><span class="stars">★★★★★</span><span>(654)</span></div><div class="product-footer"><div><span class="product-price">$69.99</span><span class="product-price-old">$99.99</span></div><button class="product-add">+ Add</button></div></div></div>
+      <div class="product-card"><div class="product-thumb">🔥<span class="product-badge badge-new">NEW</span><span class="product-wish">♡</span></div><div class="product-body"><div class="product-cat">Recovery</div><div class="product-name">CryoTherapy Ice Pack Pro</div><div class="product-stars"><span class="stars">★★★★★</span><span>(432)</span></div><div class="product-footer"><div><span class="product-price">$34.99</span><span class="product-price-old">$54.99</span></div><button class="product-add">+ Add</button></div></div></div>
+    </div>
+  </div>
+  <div class="slider-nav">
+    <button class="slider-btn" onclick="slide(-1)">←</button>
+    <button class="slider-btn" onclick="slide(1)">→</button>
+  </div>
+</div>
+
+<div class="features-grid">
+  <div class="feature-card"><div class="feature-icon">🚀</div><div class="feature-title">Fast Recovery</div><div class="feature-desc">Clinically tested technology that reduces recovery time by up to 60%.</div></div>
+  <div class="feature-card"><div class="feature-icon">🛡️</div><div class="feature-title">30-Day Guarantee</div><div class="feature-desc">Not satisfied? Full refund within 30 days, no questions asked.</div></div>
+  <div class="feature-card"><div class="feature-icon">🌍</div><div class="feature-title">Free Shipping</div><div class="feature-desc">Free worldwide shipping on all orders over $50.</div></div>
+  <div class="feature-card"><div class="feature-icon">⚕️</div><div class="feature-title">Expert Backed</div><div class="feature-desc">Recommended by physiotherapists and sports medicine professionals.</div></div>
+</div>
+
+<div class="reviews-section">
+  <div class="reviews-inner">
+    <div class="section-header">
+      <div><div class="section-label">Customer Reviews</div><div class="section-title">What Our Customers Say</div></div>
+      <a href="#" class="section-link">All Reviews →</a>
+    </div>
+    <div class="overall-rating">
+      <div class="big-rating">4.9</div>
+      <div class="rating-details"><div class="rating-stars-big">★★★★★</div><div class="rating-count">Based on 5,122 reviews</div></div>
+      <div class="rating-bars">
+        <div class="rating-bar-row"><span>5★</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:88%"></div></div><span>88%</span></div>
+        <div class="rating-bar-row"><span>4★</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:8%"></div></div><span>8%</span></div>
+        <div class="rating-bar-row"><span>3★</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:3%"></div></div><span>3%</span></div>
+        <div class="rating-bar-row"><span>2★</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:1%"></div></div><span>1%</span></div>
+        <div class="rating-bar-row"><span>1★</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:0%"></div></div><span>0%</span></div>
+      </div>
+    </div>
+    <div class="reviews-grid">
+      <div class="review-card"><div class="review-header"><div class="reviewer-avatar">JM</div><div><div class="reviewer-name">James Mitchell</div><div class="reviewer-date">May 12, 2026 · Verified</div></div></div><div class="review-stars">★★★★★</div><div class="review-text">The PostureX Pro has completely transformed my posture. After just 3 weeks of consistent use, my back pain has virtually disappeared. The smart vibration alerts are incredibly effective!</div><span class="review-product">✓ PostureX Pro Tracker</span></div>
+      <div class="review-card"><div class="review-header"><div class="reviewer-avatar" style="background:linear-gradient(135deg,#00D4FF,#0099FF)">SR</div><div><div class="reviewer-name">Sarah Reynolds</div><div class="reviewer-date">May 8, 2026 · Verified</div></div></div><div class="review-stars">★★★★★</div><div class="review-text">As a marathon runner, recovery is everything. The DeepRelief Massage Gun is a game changer — the percussion therapy reaches muscles I didn't even know were sore. Absolutely worth every penny.</div><span class="review-product">✓ DeepRelief Massage Gun</span></div>
+      <div class="review-card"><div class="review-header"><div class="reviewer-avatar" style="background:linear-gradient(135deg,#FF6B6B,#FF8E53)">AK</div><div><div class="reviewer-name">Alex Kumar</div><div class="reviewer-date">Apr 29, 2026 · Verified</div></div></div><div class="review-stars">★★★★★</div><div class="review-text">I was skeptical at first, but the ThermoFlex Knee Wrap genuinely helped my chronic knee pain. The hot/cold therapy combined with compression is exactly what my physio recommended.</div><span class="review-product">✓ ThermoFlex Knee Wrap</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="contact-section">
+  <div class="section-header">
+    <div><div class="section-label">Get In Touch</div><div class="section-title">Contact Us</div></div>
+  </div>
+  <div class="contact-grid">
+    <div class="contact-info">
+      <p style="font-size:15px;color:var(--gray4);line-height:1.7;margin-bottom:1rem">Have a question about our products or your order? Our recovery specialists are here to help.</p>
+      <div class="contact-item"><div class="contact-icon">📧</div><div><div class="contact-label">Email</div><div class="contact-value">support@apextherapy.shop</div></div></div>
+      <div class="contact-item"><div class="contact-icon">📞</div><div><div class="contact-label">Phone</div><div class="contact-value">+1 (800) APEX-CARE</div></div></div>
+      <div class="contact-item"><div class="contact-icon">🕐</div><div><div class="contact-label">Hours</div><div class="contact-value">Mon–Fri, 9AM–6PM EST</div></div></div>
+      <div class="contact-item"><div class="contact-icon">🚚</div><div><div class="contact-label">Shipping</div><div class="contact-value">Free worldwide on orders $50+</div></div></div>
+    </div>
+    <div class="contact-form">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">First Name</label><input class="form-input" placeholder="John"/></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" placeholder="Doe"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" placeholder="john@example.com"/></div>
+      <div class="form-group"><label class="form-label">Subject</label><input class="form-input" placeholder="Order inquiry, Product question..."/></div>
+      <div class="form-group"><label class="form-label">Message</label><textarea class="form-input" placeholder="How can we help you?"></textarea></div>
+      <button class="submit-btn">Send Message →</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="nav-logo" style="font-size:20px">APEX<span style="color:var(--accent)">.</span>THERAPY</div>
+        <p>Premium physical recovery and posture technology engineered for high performance and lasting pain relief.</p>
+      </div>
+      <div><div class="footer-title">Shop</div><div class="footer-links"><a href="#">Posture Trackers</a><a href="#">Massage Guns</a><a href="#">Knee Supports</a><a href="#">Back Braces</a><a href="#">Recovery Kits</a></div></div>
+      <div><div class="footer-title">Support</div><div class="footer-links"><a href="#">Contact Us</a><a href="#">FAQ</a><a href="#">Shipping Info</a><a href="#">Returns</a><a href="#">Track Order</a></div></div>
+      <div><div class="footer-title">Company</div><div class="footer-links"><a href="#">About Us</a><a href="#">Blog</a><a href="#">Reviews</a><a href="#">Privacy Policy</a><a href="#">Terms</a></div></div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2026 Apex Therapy. All rights reserved.</div>
+      <div class="footer-social">
+        <a href="#" class="social-btn">𝕏</a>
+        <a href="#" class="social-btn">📘</a>
+        <a href="#" class="social-btn">📸</a>
+        <a href="#" class="social-btn">▶</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+let pos=0;
+const track=document.getElementById('sliderTrack');
+const cards=track.querySelectorAll('.product-card');
+function getCardWidth(){return cards[0].offsetWidth+20}
+const maxPos=cards.length-4;
+function slide(dir){
+  pos=Math.max(0,Math.min(maxPos,pos+dir));
+  track.style.transform=`translateX(-${pos*getCardWidth()}px)`;
+}
+</script>
+</body>
+</html>
