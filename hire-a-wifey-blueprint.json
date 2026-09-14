@@ -1,0 +1,29 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "preferredVersions": {
+    "php": "8.3",
+    "wp": "latest"
+  },
+  "landingPage": "/book-a-wifey/",
+  "steps": [
+    {
+      "step": "login",
+      "username": "admin",
+      "password": "password"
+    },
+    {
+      "step": "installPlugin",
+      "pluginData": {
+        "resource": "git:directory",
+        "url": "https://github.com/mdhasanofc/2",
+        "ref": "main",
+        "refType": "branch",
+        "path": "hire-a-wifey-booking"
+      },
+      "options": {
+        "activate": true,
+        "targetFolderName": "hire-a-wifey-booking"
+      }
+    }
+  ]
+}
