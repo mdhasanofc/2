@@ -1,259 +1,42 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="LiveLens — create an account and watch curated live cameras from around the world." />
-  <title>LiveLens — Live Cameras Around the World</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#070a10">
+  <meta name="description" content="LiveLens secure live camera web app">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <title>LiveLens — Watch Live</title>
   <style>
-    :root{
-      --bg:#070a10;--surface:#0d121b;--surface2:#121925;--surface3:#171f2c;
-      --line:rgba(255,255,255,.09);--text:#f7f8fb;--muted:#98a4b5;
-      --violet:#7657ff;--cyan:#1fd8ec;--green:#33e2a0;--red:#ff3b5c;
-      --shadow:0 24px 80px rgba(0,0,0,.38);--radius:22px;
-    }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{margin:0;background:radial-gradient(circle at 83% 4%,rgba(118,87,255,.18),transparent 25%),radial-gradient(circle at 6% 30%,rgba(31,216,236,.08),transparent 22%),var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;line-height:1.55}
-    body.modal-open{overflow:hidden}
-    a{color:inherit;text-decoration:none}button,input{font:inherit}.hidden{display:none!important}
-    .container{width:min(1180px,calc(100% - 36px));margin:auto}
-    .nav{position:sticky;top:0;z-index:30;background:rgba(7,10,16,.76);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
-    .nav-inner{height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-    .brand{display:flex;align-items:center;gap:10px;font:800 20px "Manrope";letter-spacing:-.04em}
-    .logo{width:37px;height:37px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--violet),var(--cyan));box-shadow:0 12px 32px rgba(118,87,255,.28)}
-    .nav-links{display:flex;gap:28px;color:#c0cad8;font-size:14px;font-weight:700}.nav-links a:hover{color:#fff}
-    .nav-actions{display:flex;align-items:center;gap:10px}.btn{border:1px solid var(--line);border-radius:12px;padding:11px 16px;background:rgba(255,255,255,.035);color:#fff;font-weight:700;cursor:pointer;transition:.2s}.btn:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.18)}
-    .btn-primary{border:0;background:linear-gradient(135deg,var(--violet),#9859ff);box-shadow:0 12px 30px rgba(118,87,255,.28)}.btn-danger{color:#ffb8c3}.btn-wide{width:100%}
-    .user-pill{display:flex;align-items:center;gap:9px;padding:6px 10px 6px 6px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.03);cursor:pointer}.avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#263652,#7257ff);font-weight:800;font-size:12px}.user-pill span{font-size:13px;font-weight:700;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-    .hero{padding:82px 0 68px}.hero-grid{display:grid;grid-template-columns:1fr 1.08fr;align-items:center;gap:58px}.eyebrow{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:999px;padding:7px 11px;background:rgba(255,255,255,.03);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#d4dae3}.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px rgba(51,226,160,.1)}
-    h1{font:800 clamp(46px,6vw,76px)/.99 "Manrope";letter-spacing:-.065em;margin:22px 0}.gradient{background:linear-gradient(90deg,#fff,#9db5ff 50%,#86eff7);-webkit-background-clip:text;background-clip:text;color:transparent}.hero p{font-size:18px;color:var(--muted);max-width:620px;margin:0}.hero-actions{display:flex;gap:12px;margin-top:29px;flex-wrap:wrap}.hero-actions .btn{padding:14px 19px}
-    .proof{display:flex;gap:18px;align-items:center;margin-top:24px;color:#aeb8c6;font-size:12px}.proof strong{color:#fff}.proof-item{display:flex;align-items:center;gap:7px}
-
-    .preview{position:relative;border:1px solid rgba(255,255,255,.12);border-radius:28px;background:linear-gradient(145deg,#121927,#0c111a);overflow:hidden;box-shadow:var(--shadow);min-height:430px}.preview::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(118,87,255,.22),transparent 32%)}
-    .preview-top{position:relative;padding:18px;display:flex;align-items:center;justify-content:space-between}.live{display:inline-flex;align-items:center;gap:7px;background:var(--red);border-radius:999px;padding:7px 10px;font-size:10px;font-weight:800;letter-spacing:.08em}.live i{width:6px;height:6px;background:#fff;border-radius:50%;animation:blink 1.2s infinite}@keyframes blink{50%{opacity:.35}}
-    .preview-screen{position:relative;margin:0 18px;height:255px;border-radius:19px;overflow:hidden;background:url('https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1400&q=84') center/cover}.preview-screen::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.62),transparent 55%)}.preview-label{position:absolute;z-index:2;bottom:17px;left:17px}.preview-label strong{display:block;font:700 17px "Manrope"}.preview-label span{font-size:12px;color:#d0d6df}.play-circle{position:absolute;z-index:3;inset:50% auto auto 50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;border:1px solid rgba(255,255,255,.32);background:rgba(8,11,17,.62);backdrop-filter:blur(8px);display:grid;place-items:center;font-size:20px;cursor:pointer}
-    .preview-footer{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 18px 18px}.mini-stat{padding:13px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025)}.mini-stat strong{display:block;font:800 16px "Manrope"}.mini-stat span{color:var(--muted);font-size:10px}
-
-    .section{padding:72px 0}.section-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:28px}.section-title{font:800 clamp(32px,4vw,48px)/1.06 "Manrope";letter-spacing:-.05em;margin:0 0 10px}.section-copy{color:var(--muted);margin:0;max-width:620px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.feature-card{border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,var(--surface2),#0b1018);padding:23px}.feature-icon{width:43px;height:43px;border-radius:13px;display:grid;place-items:center;background:rgba(118,87,255,.13);margin-bottom:26px}.feature-card h3{font:700 17px "Manrope";margin:0 0 7px}.feature-card p{margin:0;color:var(--muted);font-size:13px}
-
-    .dashboard{padding:42px 0 80px}.welcome{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:28px}.welcome h2{font:800 clamp(30px,4vw,44px)/1.08 "Manrope";letter-spacing:-.045em;margin:0 0 5px}.welcome p{margin:0;color:var(--muted)}.search-wrap{display:flex;gap:9px;flex-wrap:wrap}.search{min-width:250px;border:1px solid var(--line);background:#0c1119;color:#fff;border-radius:12px;padding:11px 13px;outline:none}.search:focus{border-color:rgba(118,87,255,.8)}
-    .filters{display:flex;gap:8px;margin:0 0 22px;overflow:auto;padding-bottom:3px}.filter{white-space:nowrap;border:1px solid var(--line);background:transparent;color:#aab5c4;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer}.filter.active{color:#fff;background:rgba(118,87,255,.15);border-color:rgba(118,87,255,.45)}
-    .cam-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.cam-card{border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--surface);transition:.22s}.cam-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.17)}.cam-thumb{height:210px;position:relative;background:#111925;overflow:hidden}.cam-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:.35s}.cam-card:hover img{transform:scale(1.025)}.cam-thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.42),transparent 55%)}.cam-live{position:absolute;z-index:2;top:12px;left:12px}.fav{position:absolute;z-index:3;right:12px;top:12px;width:36px;height:36px;border-radius:11px;border:1px solid rgba(255,255,255,.2);background:rgba(5,8,13,.65);color:#fff;cursor:pointer}.fav.active{color:#ff6f89}.viewer{position:absolute;z-index:2;right:12px;bottom:12px;padding:6px 9px;border-radius:999px;background:rgba(7,10,16,.7);font-size:10px;font-weight:800}.cam-info{padding:16px}.cam-info-top{display:flex;justify-content:space-between;gap:12px}.cam-info h3{font:700 16px "Manrope";margin:0 0 3px}.cam-info p{margin:0;color:var(--muted);font-size:12px}.watch-btn{width:100%;margin-top:14px}.empty{grid-column:1/-1;text-align:center;padding:50px;border:1px dashed var(--line);border-radius:18px;color:var(--muted)}
-
-    .account-panel{position:fixed;z-index:55;top:78px;right:18px;width:min(340px,calc(100% - 36px));border:1px solid var(--line);border-radius:18px;background:#0d131d;box-shadow:var(--shadow);padding:18px}.account-head{display:flex;gap:11px;align-items:center;padding-bottom:15px;border-bottom:1px solid var(--line)}.account-head .avatar{width:44px;height:44px}.account-head strong{display:block}.account-head span{display:block;color:var(--muted);font-size:11px}.account-meta{display:grid;gap:8px;padding:14px 0}.account-meta div{display:flex;justify-content:space-between;font-size:12px}.account-meta span{color:var(--muted)}
-
-    .modal{position:fixed;z-index:80;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(9px);display:none;align-items:center;justify-content:center;padding:20px}.modal.show{display:flex}.modal-card{width:min(460px,100%);border:1px solid var(--line);border-radius:23px;background:#0d131d;box-shadow:var(--shadow);padding:24px;position:relative}.close{position:absolute;right:14px;top:14px;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:transparent;color:#fff;cursor:pointer}.modal h2{font:800 27px "Manrope";letter-spacing:-.04em;margin:5px 0 5px}.modal-sub{color:var(--muted);font-size:13px;margin:0 0 20px}.tabs{display:grid;grid-template-columns:1fr 1fr;background:#080c12;border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:18px}.tab{border:0;background:transparent;color:#8490a1;padding:9px;border-radius:9px;cursor:pointer;font-weight:700}.tab.active{background:#171f2c;color:#fff}.form{display:grid;gap:13px}.field label{display:block;font-size:11px;font-weight:700;color:#c4ccd8;margin-bottom:6px}.field input{width:100%;border:1px solid var(--line);border-radius:11px;background:#080d14;color:#fff;padding:12px 13px;outline:none}.field input:focus{border-color:rgba(118,87,255,.85)}.form-note{font-size:10px;color:#788495;margin:0}.form-message{min-height:18px;margin:0;font-size:12px}.form-message.error{color:#ff8197}.form-message.success{color:#54e6b0}
-
-    .player-modal .modal-card{width:min(980px,100%);padding:14px}.player-frame{aspect-ratio:16/9;border-radius:15px;overflow:hidden;background:#000}.player-frame iframe{width:100%;height:100%;border:0}.player-meta{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 5px 2px}.player-meta h3{font:700 18px "Manrope";margin:0}.player-meta p{margin:2px 0 0;color:var(--muted);font-size:12px}
-
-    .cta{padding:72px 0 90px}.cta-box{text-align:center;border:1px solid var(--line);border-radius:28px;padding:62px 24px;background:linear-gradient(135deg,#151126,#0d1521 63%,#08131a);position:relative;overflow:hidden}.cta-box::before{content:"";position:absolute;width:380px;height:380px;border-radius:50%;background:rgba(118,87,255,.3);filter:blur(70px);top:-310px;left:50%;transform:translateX(-50%)}.cta-box>*{position:relative}.cta h2{font:800 clamp(34px,5vw,55px)/1.02 "Manrope";letter-spacing:-.055em;margin:0 auto 16px;max-width:760px}.cta p{color:var(--muted);max-width:590px;margin:0 auto 25px}
-    footer{border-top:1px solid var(--line);padding:26px 0 32px;color:#7f8a9a;font-size:11px}.footer-inner{display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}
-    .toast{position:fixed;z-index:100;left:50%;bottom:22px;transform:translate(-50%,100px);opacity:0;background:#171f2c;border:1px solid var(--line);border-radius:12px;padding:11px 15px;box-shadow:var(--shadow);font-size:12px;transition:.28s}.toast.show{transform:translate(-50%,0);opacity:1}
-
-    @media(max-width:920px){.nav-links{display:none}.hero-grid{grid-template-columns:1fr}.hero-copy{text-align:center}.hero p{margin-inline:auto}.hero-actions,.proof{justify-content:center}.preview{min-height:410px}.cards,.cam-grid{grid-template-columns:1fr 1fr}.welcome{align-items:flex-start;flex-direction:column}.search{min-width:min(360px,100%)} }
-    @media(max-width:620px){.container{width:min(100% - 24px,1180px)}.nav-inner{height:66px}.nav-actions>.btn{display:none}.user-pill span{display:none}.hero{padding:48px 0 50px}h1{font-size:clamp(42px,13vw,58px)}.hero p{font-size:16px}.hero-actions{display:grid}.hero-actions .btn{width:100%}.proof{flex-wrap:wrap}.preview{min-height:352px;border-radius:21px}.preview-screen{height:205px;margin:0 12px}.preview-top{padding:12px}.preview-footer{padding:10px 12px 12px}.mini-stat{padding:10px}.mini-stat strong{font-size:13px}.mini-stat span{font-size:9px}.section{padding:55px 0}.cards,.cam-grid{grid-template-columns:1fr}.cam-thumb{height:225px}.search-wrap,.search{width:100%}.cta{padding:55px 0}.cta-box{padding:48px 18px}.player-modal{padding:8px}.player-modal .modal-card{padding:8px}.player-meta{align-items:flex-start;flex-direction:column}.footer-inner{justify-content:center;text-align:center}}
+    :root{--bg:#070a10;--panel:#101722;--panel2:#151f2d;--line:#263247;--text:#f7f9fc;--muted:#99a7bb;--accent:#7c5cff;--accent2:#22d3ee;--danger:#ff4d6d;--ok:#35df9b}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 80% 0,#1d1640 0,transparent 30%),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}.wrap{width:min(1180px,calc(100% - 32px));margin:auto}.hidden{display:none!important}
+    header{position:sticky;top:0;z-index:20;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(7,10,16,.82);backdrop-filter:blur(18px)}nav{height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}.logo{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2))}.actions{display:flex;gap:10px;align-items:center}.btn{border:1px solid var(--line);background:#121a27;color:white;padding:11px 16px;border-radius:12px;font-weight:700;cursor:pointer}.btn.primary{border:0;background:linear-gradient(135deg,var(--accent),#9f5fff)}.btn.ghost{background:transparent}.btn.full{width:100%}.btn:disabled{opacity:.55;cursor:not-allowed}
+    .hero{padding:72px 0 48px}.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:52px;align-items:center}.pill{display:inline-flex;gap:8px;align-items:center;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:#cbd5e1;font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 6px rgba(53,223,155,.08)}h1{font-size:clamp(46px,6vw,76px);line-height:.98;margin:22px 0;letter-spacing:-.06em}.grad{background:linear-gradient(90deg,#fff,#a9bcff,#86f0ff);-webkit-background-clip:text;background-clip:text;color:transparent}.lead{font-size:18px;line-height:1.7;color:var(--muted);max-width:650px}.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}.preview{position:relative;border:1px solid var(--line);border-radius:28px;overflow:hidden;background:#101722;min-height:390px;box-shadow:0 30px 80px rgba(0,0,0,.35)}.preview img{width:100%;height:100%;min-height:390px;object-fit:cover;opacity:.72}.overlay{position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(0,0,0,.72));display:flex;align-items:flex-end;padding:22px}.live{display:inline-flex;gap:7px;align-items:center;background:var(--danger);padding:7px 10px;border-radius:999px;font-size:11px;font-weight:800}.live i{width:7px;height:7px;border-radius:50%;background:#fff}.preview-info{display:flex;justify-content:space-between;align-items:end;width:100%;gap:16px}.preview h3{margin:10px 0 2px;font-size:22px}.preview p{margin:0;color:#d2dae6;font-size:13px}
+    section{padding:68px 0}.section-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:28px}.section-head h2{font-size:40px;margin:0 0 8px;letter-spacing:-.04em}.section-head p{margin:0;color:var(--muted)}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}.search{flex:1;min-width:220px;background:#0f1722;border:1px solid var(--line);color:white;padding:13px 14px;border-radius:12px}.filter{border:1px solid var(--line);background:#111a27;color:#b9c4d3;padding:10px 13px;border-radius:10px;cursor:pointer}.filter.active{background:#241d47;color:#fff;border-color:#6f5af0}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;overflow:hidden}.thumb{height:215px;position:relative;background:#172131}.thumb img{width:100%;height:100%;object-fit:cover}.badge{position:absolute;left:12px;top:12px}.fav{position:absolute;right:12px;top:12px;border:0;width:38px;height:38px;border-radius:50%;background:rgba(8,12,18,.75);color:#fff;font-size:20px;cursor:pointer}.fav.active{color:#ff6d89}.card-body{padding:16px}.card-body h3{margin:0 0 4px}.card-body p{margin:0 0 14px;color:var(--muted);font-size:13px}
+    .account{background:linear-gradient(135deg,#15142a,#0e1722);border:1px solid var(--line);border-radius:24px;padding:26px}.account-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.stat{padding:18px;border:1px solid var(--line);border-radius:16px;background:#0f1722}.stat small{color:var(--muted)}.stat strong{display:block;font-size:26px;margin-top:4px}.status{margin-top:14px;padding:12px;border-radius:10px;font-size:13px}.status.ok{background:rgba(53,223,155,.09);color:#9df3d0}.status.warn{background:rgba(255,193,7,.09);color:#ffe08a}.status.err{background:rgba(255,77,109,.09);color:#ffb1bf}
+    .modal{position:fixed;inset:0;z-index:80;background:rgba(3,5,9,.78);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:18px}.modal.show{display:flex}.box{width:min(460px,100%);background:#0d141f;border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:0 30px 100px rgba(0,0,0,.5)}.box.large{width:min(980px,100%)}.box h2{margin:0 0 7px}.sub{color:var(--muted);font-size:13px;margin-bottom:20px}.tabs{display:flex;gap:8px;margin-bottom:18px}.tab{flex:1;border:1px solid var(--line);background:#121b28;color:#aeb9c9;padding:10px;border-radius:10px;cursor:pointer}.tab.active{background:#261f4d;color:#fff}.field{margin:12px 0}.field label{display:block;color:#c9d2de;font-size:12px;margin-bottom:6px}.field input{width:100%;background:#0a1019;border:1px solid var(--line);color:#fff;padding:13px;border-radius:11px}.msg{font-size:13px;min-height:20px;margin:10px 0}.msg.error{color:#ff9caf}.msg.success{color:#8ef0c7}.close{float:right;border:0;background:transparent;color:#aab6c6;font-size:24px;cursor:pointer}.video{aspect-ratio:16/9;width:100%;border:0;border-radius:16px;background:#000}.footer{border-top:1px solid var(--line);padding:28px 0;color:#7f8da1;font-size:12px}.empty{grid-column:1/-1;padding:40px;border:1px dashed var(--line);border-radius:16px;text-align:center;color:var(--muted)}
+    @media(max-width:900px){.hero-grid,.account-grid{grid-template-columns:1fr}.hero{text-align:center}.lead{margin:auto}.hero-actions{justify-content:center}.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:620px){.wrap{width:min(100% - 20px,1180px)}nav{height:64px}.actions .desktop{display:none}.hero{padding-top:46px}h1{font-size:48px}.preview,.preview img{min-height:300px}.grid{grid-template-columns:1fr}.section-head h2{font-size:32px}.box{padding:18px}.btn{padding:10px 13px}}
   </style>
 </head>
 <body>
-  <nav class="nav">
-    <div class="container nav-inner">
-      <a class="brand" href="#home"><span class="logo">◉</span>LiveLens</a>
-      <div class="nav-links"><a href="#home">Home</a><a href="#how">How it works</a><a href="#dashboardLink" id="camsNav">Live cams</a></div>
-      <div class="nav-actions" id="guestActions">
-        <button class="btn" data-auth="login">Log in</button>
-        <button class="btn btn-primary" data-auth="signup">Create account</button>
-      </div>
-      <div class="nav-actions hidden" id="userActions">
-        <button class="user-pill" id="accountBtn"><span class="avatar" id="navAvatar">U</span><span id="navName">Account</span></button>
-      </div>
-    </div>
-  </nav>
+<header><div class="wrap"><nav><div class="brand"><div class="logo">◉</div>LiveLens</div><div class="actions" id="guestActions"><button class="btn ghost desktop" data-auth="login">Log in</button><button class="btn primary" data-auth="signup">Create account</button></div><div class="actions hidden" id="userActions"><span id="navName" class="desktop"></span><button class="btn" id="accountBtn">Account</button><button class="btn ghost" id="logoutBtn">Logout</button></div></nav></div></header>
 
-  <div class="account-panel hidden" id="accountPanel">
-    <div class="account-head"><span class="avatar" id="panelAvatar">U</span><div><strong id="panelName">User</strong><span id="panelEmail">user@example.com</span></div></div>
-    <div class="account-meta"><div><span>Plan</span><strong>Free viewer</strong></div><div><span>Saved cams</span><strong id="savedCount">0</strong></div><div><span>Account status</span><strong style="color:#53e5ad">Active</strong></div></div>
-    <button class="btn btn-danger btn-wide" id="logoutBtn">Log out</button>
-  </div>
+<main>
+<section class="hero"><div class="wrap hero-grid"><div><span class="pill"><span class="dot"></span> Secure live camera platform</span><h1>Watch the world <span class="grad">live.</span></h1><p class="lead">Create a verified account, sign in securely, save your favourite cameras and watch active live streams from any phone or computer.</p><div class="hero-actions"><button class="btn primary" id="startBtn">Create free account</button><button class="btn" id="browseBtn">Browse cameras</button></div><div id="authNotice" class="status warn">Email verification is required before account access.</div></div><div class="preview"><img src="https://images.unsplash.com/photo-1522083165195-3424ed129620?auto=format&fit=crop&w=1200&q=80" alt="Times Square"><div class="overlay"><div class="preview-info"><div><span class="live"><i></i> LIVE</span><h3>Times Square</h3><p>New York, USA</p></div><button class="btn primary" id="previewPlay">Watch</button></div></div></div></div></section>
 
-  <main id="home">
-    <section class="hero" id="landingView">
-      <div class="container hero-grid">
-        <div class="hero-copy">
-          <div class="eyebrow"><span class="dot"></span> live cameras online</div>
-          <h1>One account. <span class="gradient">A world of live views.</span></h1>
-          <p>Create your free LiveLens account, sign in and instantly open curated live camera streams from cities around the world.</p>
-          <div class="hero-actions">
-            <button class="btn btn-primary" data-auth="signup">Create free account</button>
-            <button class="btn" data-auth="login">I already have an account</button>
-          </div>
-          <div class="proof"><span class="proof-item">✓ <strong>Free signup</strong></span><span class="proof-item">✓ No card required</span><span class="proof-item">✓ Live viewing dashboard</span></div>
-        </div>
-        <div class="preview">
-          <div class="preview-top"><span class="live"><i></i> LIVE PREVIEW</span><span style="font-size:11px;color:#aab5c4">🔒 Full streams after login</span></div>
-          <div class="preview-screen"><button class="play-circle" id="previewPlay" aria-label="Create account to watch">▶</button><div class="preview-label"><strong>Global City Cameras</strong><span>Sign in to choose a live location</span></div></div>
-          <div class="preview-footer"><div class="mini-stat"><strong>24/7</strong><span>Live access</span></div><div class="mini-stat"><strong>HD</strong><span>Video feeds</span></div><div class="mini-stat"><strong>3+</strong><span>Starter cams</span></div></div>
-        </div>
-      </div>
-    </section>
+<section id="cams"><div class="wrap"><div class="section-head"><div><h2>Live cameras</h2><p>Sign in to load active cameras securely from the database.</p></div></div><div class="toolbar"><input class="search" id="search" placeholder="Search camera or location"><button class="filter active" data-filter="all">All</button><button class="filter" data-filter="city">City</button><button class="filter" data-filter="favorites">Favorites</button></div><div class="grid" id="camGrid"><div class="empty">Sign in to view live cameras.</div></div></div></section>
 
-    <section class="section" id="how">
-      <div class="container">
-        <div class="section-head"><div><h2 class="section-title">Start watching in seconds.</h2><p class="section-copy">The account flow is built directly into this version of the site.</p></div></div>
-        <div class="cards">
-          <article class="feature-card"><div class="feature-icon">01</div><h3>Create your account</h3><p>Enter your name, email and password. Your demo account is saved in your browser.</p></article>
-          <article class="feature-card"><div class="feature-icon">02</div><h3>Sign in</h3><p>Your session stays active on this browser so you can return to the live camera dashboard.</p></article>
-          <article class="feature-card"><div class="feature-icon">03</div><h3>Watch live cameras</h3><p>Open a camera in the built-in player, search by location and save your favorites.</p></article>
-        </div>
-      </div>
-    </section>
+<section id="accountSection" class="hidden"><div class="wrap"><div class="account"><div class="section-head"><div><h2>Your account</h2><p>Real Supabase user profile and saved favourites.</p></div></div><div class="account-grid"><div class="stat"><small>Name</small><strong id="profileName">—</strong><span id="profileEmail" style="color:var(--muted)"></span></div><div class="stat"><small>Saved cameras</small><strong id="savedCount">0</strong><span style="color:var(--muted)">Synced to your account</span></div></div><div id="verifyState" class="status ok">Secure Supabase session active.</div></div></div></section>
+</main>
 
-    <section class="dashboard hidden" id="dashboardLink">
-      <div class="container">
-        <div class="welcome">
-          <div><div class="eyebrow"><span class="dot"></span> account dashboard</div><h2 style="margin-top:14px">Welcome back, <span id="welcomeName">viewer</span>.</h2><p>Choose a camera and start watching live.</p></div>
-          <div class="search-wrap"><input class="search" id="camSearch" type="search" placeholder="Search city or country…" /></div>
-        </div>
-        <div class="filters"><button class="filter active" data-filter="all">All cams</button><button class="filter" data-filter="city">City</button><button class="filter" data-filter="street">Street</button><button class="filter" data-filter="favorites">Favorites</button></div>
-        <div class="cam-grid" id="camGrid"></div>
-      </div>
-    </section>
+<div class="modal" id="authModal"><div class="box"><button class="close" data-close="auth">×</button><h2 id="authTitle">Create your account</h2><div class="sub" id="authSub">Use your email and verify it from your inbox.</div><div class="tabs"><button class="tab active" data-tab="signup">Sign up</button><button class="tab" data-tab="login">Log in</button></div><form id="signupForm"><div class="field"><label>Full name</label><input id="signupName" required minlength="2" autocomplete="name"></div><div class="field"><label>Email</label><input id="signupEmail" type="email" required autocomplete="email"></div><div class="field"><label>Password</label><input id="signupPassword" type="password" required minlength="8" autocomplete="new-password"></div><div class="msg" id="signupMsg"></div><button class="btn primary full" type="submit">Create account</button></form><form id="loginForm" class="hidden"><div class="field"><label>Email</label><input id="loginEmail" type="email" required autocomplete="email"></div><div class="field"><label>Password</label><input id="loginPassword" type="password" required autocomplete="current-password"></div><div class="msg" id="loginMsg"></div><button class="btn primary full" type="submit">Log in</button><button class="btn ghost full" type="button" id="resetBtn" style="margin-top:8px">Forgot password?</button></form></div></div>
 
-    <section class="cta" id="guestCta">
-      <div class="container"><div class="cta-box"><h2>Ready to see what’s happening right now?</h2><p>Create an account and unlock the live camera dashboard.</p><button class="btn btn-primary" data-auth="signup">Create free account</button></div></div>
-    </section>
-  </main>
+<div class="modal" id="playerModal"><div class="box large"><button class="close" data-close="player">×</button><h2 id="playerTitle">Live camera</h2><div class="sub" id="playerLocation"></div><iframe class="video" id="playerFrame" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div></div>
 
-  <footer><div class="container footer-inner"><a class="brand" style="font-size:15px" href="#home"><span class="logo" style="width:29px;height:29px;border-radius:9px">◉</span>LiveLens</a><span>© 2026 LiveLens · Demo live-camera platform</span><span>Only view cameras/streams you are authorized to access.</span></div></footer>
+<div class="footer"><div class="wrap">LiveLens • Secure Supabase Auth + Database • Responsive web & installable PWA</div></div>
 
-  <div class="modal" id="authModal" role="dialog" aria-modal="true">
-    <div class="modal-card">
-      <button class="close" data-close="auth">✕</button>
-      <h2 id="authTitle">Create your account</h2><p class="modal-sub" id="authSub">Join LiveLens and open the live camera dashboard.</p>
-      <div class="tabs"><button class="tab active" data-tab="signup">Sign up</button><button class="tab" data-tab="login">Log in</button></div>
-      <form class="form" id="signupForm">
-        <div class="field"><label>YOUR NAME</label><input id="signupName" autocomplete="name" required minlength="2" placeholder="Mohammad Hasan" /></div>
-        <div class="field"><label>EMAIL ADDRESS</label><input id="signupEmail" type="email" autocomplete="email" required placeholder="you@example.com" /></div>
-        <div class="field"><label>PASSWORD</label><input id="signupPassword" type="password" autocomplete="new-password" required minlength="6" placeholder="Minimum 6 characters" /></div>
-        <p class="form-note">Demo mode: account data is stored only in this browser. Do not reuse an important password.</p>
-        <p class="form-message" id="signupMessage"></p><button class="btn btn-primary btn-wide" type="submit">Create account & watch live</button>
-      </form>
-      <form class="form hidden" id="loginForm">
-        <div class="field"><label>EMAIL ADDRESS</label><input id="loginEmail" type="email" autocomplete="email" required placeholder="you@example.com" /></div>
-        <div class="field"><label>PASSWORD</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Your password" /></div>
-        <p class="form-message" id="loginMessage"></p><button class="btn btn-primary btn-wide" type="submit">Log in to LiveLens</button>
-      </form>
-    </div>
-  </div>
-
-  <div class="modal player-modal" id="playerModal" role="dialog" aria-modal="true">
-    <div class="modal-card"><button class="close" data-close="player">✕</button><div class="player-frame"><iframe id="camFrame" src="" title="Live camera player" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div><div class="player-meta"><div><h3 id="playerTitle">Live camera</h3><p id="playerLocation">Location</p></div><span class="live"><i></i> LIVE</span></div></div>
-  </div>
-
-  <div class="toast" id="toast"></div>
-
-  <script>
-    const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-    const authModal=$('#authModal'), playerModal=$('#playerModal'), signupForm=$('#signupForm'), loginForm=$('#loginForm');
-    const cams=[
-      {id:'times-square',title:'Times Square 4K',location:'New York, United States',category:'city',video:'Lr-u3vIZ3KE',thumb:'https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&w=1000&q=82',viewers:'2.4K'},
-      {id:'abbey-road',title:'Abbey Road Crossing',location:'London, England',category:'street',video:'M3EYAY2MftI',thumb:'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1000&q=82',viewers:'1.1K'},
-      {id:'new-orleans',title:'New Orleans Street View',location:'New Orleans, United States',category:'street',video:'Ksrleaxxxhw',thumb:'https://images.unsplash.com/photo-1519662978799-2f05096d3636?auto=format&fit=crop&w=1000&q=82',viewers:'1.8K'}
-    ];
-    let activeFilter='all';
-
-    function users(){try{return JSON.parse(localStorage.getItem('livelens_users')||'{}')}catch{return {}}}
-    function session(){return localStorage.getItem('livelens_session')||''}
-    function currentUser(){const email=session();return email?users()[email]||null:null}
-    async function hashPassword(text){const bytes=new TextEncoder().encode(text);const digest=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('')}
-    function initials(name){return name.trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'U'}
-    function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>el.classList.remove('show'),2200)}
-    function openModal(el){el.classList.add('show');document.body.classList.add('modal-open')}
-    function closeModal(el){el.classList.remove('show');document.body.classList.remove('modal-open');if(el===playerModal)$('#camFrame').src=''}
-
-    function setAuthTab(mode){
-      $$('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===mode));
-      signupForm.classList.toggle('hidden',mode!=='signup');loginForm.classList.toggle('hidden',mode!=='login');
-      $('#authTitle').textContent=mode==='signup'?'Create your account':'Welcome back';
-      $('#authSub').textContent=mode==='signup'?'Join LiveLens and open the live camera dashboard.':'Log in to continue watching live cameras.';
-      $('#signupMessage').textContent='';$('#loginMessage').textContent='';
-    }
-    function openAuth(mode='signup'){setAuthTab(mode);openModal(authModal)}
-
-    function favorites(){const u=currentUser();return u?.favorites||[]}
-    function updateUser(update){const email=session();if(!email)return;const all=users();all[email]={...all[email],...update};localStorage.setItem('livelens_users',JSON.stringify(all))}
-
-    function renderCams(){
-      const q=$('#camSearch').value.trim().toLowerCase(), favs=favorites();
-      const list=cams.filter(c=>{
-        const searchOk=!q||(c.title+' '+c.location).toLowerCase().includes(q);
-        const filterOk=activeFilter==='all'||(activeFilter==='favorites'?favs.includes(c.id):c.category===activeFilter);
-        return searchOk&&filterOk;
-      });
-      $('#camGrid').innerHTML=list.length?list.map(c=>`<article class="cam-card">
-        <div class="cam-thumb"><img loading="lazy" src="${c.thumb}" alt="${c.title}"><span class="live cam-live"><i></i> LIVE</span><button class="fav ${favs.includes(c.id)?'active':''}" data-fav="${c.id}" aria-label="Save favorite">${favs.includes(c.id)?'♥':'♡'}</button><span class="viewer">◉ ${c.viewers} watching</span></div>
-        <div class="cam-info"><div class="cam-info-top"><div><h3>${c.title}</h3><p>${c.location}</p></div></div><button class="btn btn-primary watch-btn" data-watch="${c.id}">Watch live</button></div>
-      </article>`).join(''):`<div class="empty">No cameras match this filter.</div>`;
-      $('#savedCount').textContent=favs.length;
-      $$('[data-watch]').forEach(b=>b.onclick=()=>openCam(b.dataset.watch));
-      $$('[data-fav]').forEach(b=>b.onclick=()=>toggleFavorite(b.dataset.fav));
-    }
-
-    function openCam(id){
-      if(!currentUser()){openAuth('login');return}
-      const cam=cams.find(c=>c.id===id);if(!cam)return;
-      $('#playerTitle').textContent=cam.title;$('#playerLocation').textContent=cam.location;
-      $('#camFrame').src=`https://www.youtube-nocookie.com/embed/${cam.video}?autoplay=1&mute=1&rel=0`;
-      openModal(playerModal);
-    }
-    function toggleFavorite(id){
-      const u=currentUser();if(!u)return openAuth('login');let favs=[...(u.favorites||[])];
-      favs=favs.includes(id)?favs.filter(x=>x!==id):[...favs,id];updateUser({favorites:favs});renderCams();toast(favs.includes(id)?'Saved to favorites':'Removed from favorites');
-    }
-
-    function renderAuthState(){
-      const u=currentUser(), signed=!!u;
-      $('#guestActions').classList.toggle('hidden',signed);$('#userActions').classList.toggle('hidden',!signed);
-      $('#dashboardLink').classList.toggle('hidden',!signed);$('#guestCta').classList.toggle('hidden',signed);
-      if(signed){
-        const ini=initials(u.name);$('#navAvatar').textContent=ini;$('#panelAvatar').textContent=ini;$('#navName').textContent=u.name.split(' ')[0];$('#panelName').textContent=u.name;$('#panelEmail').textContent=u.email;$('#welcomeName').textContent=u.name.split(' ')[0];renderCams();
-      }else{$('#accountPanel').classList.add('hidden')}
-    }
-
-    signupForm.addEventListener('submit',async e=>{
-      e.preventDefault();const name=$('#signupName').value.trim(),email=$('#signupEmail').value.trim().toLowerCase(),password=$('#signupPassword').value;
-      const msg=$('#signupMessage');msg.className='form-message';
-      if(name.length<2||password.length<6){msg.textContent='Please enter a valid name and a password with at least 6 characters.';msg.classList.add('error');return}
-      const all=users();if(all[email]){msg.textContent='An account with this email already exists. Try logging in.';msg.classList.add('error');return}
-      msg.textContent='Creating account…';
-      try{all[email]={name,email,passwordHash:await hashPassword(password),favorites:[],createdAt:new Date().toISOString()};localStorage.setItem('livelens_users',JSON.stringify(all));localStorage.setItem('livelens_session',email);msg.textContent='Account created successfully.';msg.classList.add('success');setTimeout(()=>{closeModal(authModal);renderAuthState();$('#dashboardLink').scrollIntoView({behavior:'smooth'});toast('Welcome to LiveLens!')},350)}catch{msg.textContent='Could not create account in this browser.';msg.classList.add('error')}
-    });
-
-    loginForm.addEventListener('submit',async e=>{
-      e.preventDefault();const email=$('#loginEmail').value.trim().toLowerCase(),password=$('#loginPassword').value,msg=$('#loginMessage');msg.className='form-message';const u=users()[email];
-      if(!u){msg.textContent='No account found with that email.';msg.classList.add('error');return}
-      const hash=await hashPassword(password);if(hash!==u.passwordHash){msg.textContent='Incorrect password.';msg.classList.add('error');return}
-      localStorage.setItem('livelens_session',email);msg.textContent='Login successful.';msg.classList.add('success');setTimeout(()=>{closeModal(authModal);renderAuthState();$('#dashboardLink').scrollIntoView({behavior:'smooth'});toast('Logged in successfully')},250)
-    });
-
-    $$('[data-auth]').forEach(b=>b.addEventListener('click',()=>openAuth(b.dataset.auth)));
-    $$('[data-tab]').forEach(b=>b.addEventListener('click',()=>setAuthTab(b.dataset.tab)));
-    $$('[data-close="auth"]').forEach(b=>b.addEventListener('click',()=>closeModal(authModal)));
-    $$('[data-close="player"]').forEach(b=>b.addEventListener('click',()=>closeModal(playerModal)));
-    [authModal,playerModal].forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m)}));
-    $('#previewPlay').addEventListener('click',()=>currentUser()?$('#dashboardLink').scrollIntoView({behavior:'smooth'}):openAuth('signup'));
-    $('#accountBtn').addEventListener('click',()=>$('#accountPanel').classList.toggle('hidden'));
-    $('#logoutBtn').addEventListener('click',()=>{localStorage.removeItem('livelens_session');renderAuthState();$('#home').scrollIntoView({behavior:'smooth'});toast('You are logged out')});
-    $('#camsNav').addEventListener('click',e=>{if(!currentUser()){e.preventDefault();openAuth('login')}});
-    $('#camSearch').addEventListener('input',renderCams);
-    $$('.filter').forEach(b=>b.addEventListener('click',()=>{activeFilter=b.dataset.filter;$$('.filter').forEach(x=>x.classList.toggle('active',x===b));renderCams()}));
-    document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(playerModal.classList.contains('show'))closeModal(playerModal);else if(authModal.classList.contains('show'))closeModal(authModal)}});
-    document.addEventListener('click',e=>{if(!e.target.closest('#accountPanel')&&!e.target.closest('#accountBtn'))$('#accountPanel').classList.add('hidden')});
-    renderAuthState();
-  </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
 </body>
 </html>
