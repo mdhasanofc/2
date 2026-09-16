@@ -23,13 +23,18 @@ function setAuthTab(mode){
 }
 function showAuth(mode='signup'){setAuthTab(mode);openModal(authModal)}
 
+function setFooter(){
+  const footer=$('.footer .wrap');
+  if(footer)footer.innerHTML='2026 by <strong>livelens</strong>. All Rights Reserved.';
+}
+
 async function loadProfile(){
   if(!currentUser)return;
   const {data}=await supabaseClient.from('profiles').select('full_name').eq('id',currentUser.id).single();
   currentProfileName=data?.full_name||currentUser.user_metadata?.full_name||'Creator';
-  $('#profileName').textContent=currentProfileName;
-  $('#profileEmail').textContent=currentUser.email||'';
-  $('#navName').textContent=currentProfileName.split(' ')[0]||'Creator';
+  if($('#profileName'))$('#profileName').textContent=currentProfileName;
+  if($('#profileEmail'))$('#profileEmail').textContent=currentUser.email||'';
+  if($('#navName'))$('#navName').textContent=currentProfileName.split(' ')[0]||'Creator';
 }
 
 function videoUrl(path){
@@ -39,20 +44,71 @@ function videoUrl(path){
 
 async function loadVideos(){
   const {data,error}=await supabaseClient.from('videos').select('id,user_id,creator_name,title,description,storage_path,mime_type,size_bytes,created_at').eq('is_published',true).order('created_at',{ascending:false}).limit(30);
-  if(error){$('#videoGrid').innerHTML='<div class="empty">Could not load videos.</div>';return;}
+  if(error){if($('#videoGrid'))$('#videoGrid').innerHTML='<div class="empty">Could not load videos.</div>';return;}
   videos=data||[];
   renderVideos();
-  if(currentUser)$('#myVideoCount').textContent=videos.filter(v=>v.user_id===currentUser.id).length;
+  if($('#myVideoCount'))$('#myVideoCount').textContent=currentUser?videos.filter(v=>v.user_id===currentUser.id).length:0;
 }
 
 function renderVideos(){
   const el=$('#videoGrid');
+  if(!el)return;
   if(!videos.length){el.innerHTML='<div class="empty">No videos uploaded yet.</div>';return;}
   el.innerHTML=videos.map(v=>{
     const url=videoUrl(v.storage_path);
-    return `<article class="card"><div class="thumb"><video src="${safe(url)}#t=0.1" preload="metadata" muted playsinline></video></div><div class="card-body"><div class="creator">${safe(v.creator_name)}</div><h3>${safe(v.title)}</h3><p>${safe((v.description||'').slice(0,140))}</p><button class="btn primary full" data-play-video="${safe(v.id)}">Watch video</button></div></article>`;
+    const mine=!!(currentUser&&v.user_id===currentUser.id);
+    const ownerActions=mine?`<button class="btn ghost full" style="border-color:#ff4d6d;color:#ff9caf" data-delete-video="${safe(v.id)}">Delete video</button>`:'';
+    return `<article class="card">
+      <div class="thumb" style="height:auto;aspect-ratio:16/9;background:#000">
+        <video data-inline-video="${safe(v.id)}" src="${safe(url)}" controls preload="metadata" playsinline style="width:100%;height:100%;object-fit:contain;background:#000"></video>
+      </div>
+      <div class="card-body">
+        <div class="creator">${safe(v.creator_name)}</div>
+        <h3>${safe(v.title)}</h3>
+        <p>${safe((v.description||'').slice(0,140))}</p>
+        <div style="display:grid;gap:8px">
+          <button class="btn primary full" data-play-video="${safe(v.id)}">Open player</button>
+          <a class="btn full" style="text-decoration:none;text-align:center" href="${safe(url)}" target="_blank" rel="noopener">Open original video</a>
+          ${ownerActions}
+        </div>
+      </div>
+    </article>`;
   }).join('');
+
   $$('[data-play-video]').forEach(b=>b.onclick=()=>openUploadedVideo(b.dataset.playVideo));
+  $$('[data-delete-video]').forEach(b=>b.onclick=()=>deleteVideo(b.dataset.deleteVideo,b));
+  $$('[data-inline-video]').forEach(video=>{
+    video.addEventListener('error',()=>{
+      const card=video.closest('.card');
+      if(!card||card.querySelector('.video-card-error'))return;
+      const msg=document.createElement('div');
+      msg.className='video-card-error';
+      msg.style.cssText='padding:9px 12px;color:#ffb1bf;font-size:12px;background:#ff4d6d17';
+      msg.textContent='This browser could not play the file here. Use “Open original video” below.';
+      video.parentElement.insertAdjacentElement('afterend',msg);
+    });
+  });
+}
+
+async function deleteVideo(id,button){
+  if(!currentUser)return showAuth('login');
+  const v=videos.find(x=>String(x.id)===String(id));
+  if(!v||v.user_id!==currentUser.id)return alert('You can only delete your own videos.');
+  if(!confirm(`Delete “${v.title}”? This cannot be undone.`))return;
+  const oldText=button?.textContent||'Delete video';
+  if(button){button.disabled=true;button.textContent='Deleting…';}
+
+  const {error:dbError}=await supabaseClient.from('videos').delete().eq('id',v.id).eq('user_id',currentUser.id);
+  if(dbError){
+    if(button){button.disabled=false;button.textContent=oldText;}
+    return alert('Delete failed: '+dbError.message);
+  }
+
+  const {error:storageError}=await supabaseClient.storage.from('videos').remove([v.storage_path]);
+  videos=videos.filter(x=>String(x.id)!==String(v.id));
+  renderVideos();
+  if($('#myVideoCount'))$('#myVideoCount').textContent=videos.filter(x=>x.user_id===currentUser.id).length;
+  if(storageError)alert('Video removed from the website, but storage cleanup failed: '+storageError.message);
 }
 
 function resetVideoPlayer(){
@@ -72,6 +128,7 @@ function resetVideoPlayer(){
 
 function attachPlayerSource(v,src){
   const player=$('#videoPlayer');
+  if(!player)return;
   player.innerHTML='';
   const source=document.createElement('source');
   source.src=src;
@@ -82,6 +139,7 @@ function attachPlayerSource(v,src){
 
 async function blobPlaybackFallback(v,publicUrl){
   const player=$('#videoPlayer');
+  if(!player)return;
   try{
     setMsg('#videoStatus','Direct playback failed. Retrying video…','');
     const response=await fetch(publicUrl,{cache:'no-store'});
@@ -92,25 +150,26 @@ async function blobPlaybackFallback(v,publicUrl){
     attachPlayerSource(v,activeVideoBlobUrl);
     player.play().catch(()=>{});
   }catch(err){
-    setMsg('#videoStatus',`${err.message||'Video could not be loaded.'} Use “Open original video” below.`,'error');
+    setMsg('#videoStatus',`${err.message||'Video could not be loaded.'} Use “Open original video”.`,'error');
   }
 }
 
 function openUploadedVideo(id){
   const v=videos.find(x=>String(x.id)===String(id));
   if(!v)return;
-  resetVideoPlayer();
   const publicUrl=videoUrl(v.storage_path);
   const player=$('#videoPlayer');
-  $('#videoTitle').textContent=v.title;
-  $('#videoCreator').textContent='By '+v.creator_name;
-  $('#openOriginalVideo').href=publicUrl;
+  if(!videoModal||!player){window.open(publicUrl,'_blank','noopener');return;}
+  resetVideoPlayer();
+  if($('#videoTitle'))$('#videoTitle').textContent=v.title;
+  if($('#videoCreator'))$('#videoCreator').textContent='By '+v.creator_name;
+  if($('#openOriginalVideo'))$('#openOriginalVideo').href=publicUrl;
   setMsg('#videoStatus','Loading video…');
-  player.onloadedmetadata=()=>setMsg('#videoStatus','Video ready.','success');
-  player.oncanplay=()=>setMsg('#videoStatus','Video ready.','success');
+  player.onloadedmetadata=()=>setMsg('#videoStatus','Video ready. Press Play.','success');
+  player.oncanplay=()=>setMsg('#videoStatus','Video ready. Press Play.','success');
   player.onerror=async()=>{
     if(player.dataset.fallbackTried==='1'){
-      setMsg('#videoStatus','This browser cannot play this video. It may use an unsupported codec. Try “Open original video”.','error');
+      setMsg('#videoStatus','This browser cannot play this file here. Use “Open original video”.','error');
       return;
     }
     player.dataset.fallbackTried='1';
@@ -118,16 +177,16 @@ function openUploadedVideo(id){
   };
   attachPlayerSource(v,publicUrl);
   openModal(videoModal);
-  player.play().catch(()=>setMsg('#videoStatus','Video ready. Press Play to start.','success'));
 }
 
 async function loadLiveRooms(){
   const {data,error}=await supabaseClient.from('live_rooms').select('id,user_id,creator_name,title,is_live,started_at').eq('is_live',true).order('started_at',{ascending:false});
-  if(error){$('#liveGrid').innerHTML='<div class="empty">Could not load live streams.</div>';return;}
+  if(error){if($('#liveGrid'))$('#liveGrid').innerHTML='<div class="empty">Could not load live streams.</div>';return;}
   liveRooms=data||[];renderLiveRooms();
 }
 function renderLiveRooms(){
   const el=$('#liveGrid');
+  if(!el)return;
   if(!liveRooms.length){el.innerHTML='<div class="empty">No live streams right now. Be the first to go live.</div>';return;}
   el.innerHTML=liveRooms.map(r=>`<article class="card"><div class="thumb"><div style="text-align:center"><span class="live">● LIVE</span><div style="font-size:42px;margin-top:20px">◉</div></div></div><div class="card-body"><div class="creator">${safe(r.creator_name)}</div><h3>${safe(r.title)}</h3><p>Browser live stream</p><button class="btn livebtn full" data-watch-live="${safe(r.id)}">Watch live</button></div></article>`).join('');
   $$('[data-watch-live]').forEach(b=>b.onclick=()=>watchLive(b.dataset.watchLive));
@@ -136,19 +195,21 @@ function renderLiveRooms(){
 async function refreshAuthUI(){
   const {data:{user}}=await supabaseClient.auth.getUser();currentUser=user||null;
   const signed=!!currentUser;
-  $('#guestActions').classList.toggle('hidden',signed);
-  $('#userActions').classList.toggle('hidden',!signed);
-  $('#accountSection').classList.toggle('hidden',!signed);
-  $('#startBtn').textContent=signed?'Open Creator Studio':'Create free account';
-  $('#authNotice').className='status '+(signed?'ok':'warn');
-  $('#authNotice').textContent=signed?'Creator tools are ready. Upload a video or go live.':'Sign in to upload videos or start a live stream.';
+  if($('#guestActions'))$('#guestActions').classList.toggle('hidden',signed);
+  if($('#userActions'))$('#userActions').classList.toggle('hidden',!signed);
+  if($('#accountSection'))$('#accountSection').classList.toggle('hidden',!signed);
+  if($('#startBtn'))$('#startBtn').textContent=signed?'Open Creator Studio':'Create free account';
+  if($('#authNotice')){
+    $('#authNotice').className='status '+(signed?'ok':'warn');
+    $('#authNotice').textContent=signed?'Creator tools are ready. Upload a video or go live.':'Sign in to upload videos or start a live stream.';
+  }
   if(signed)await loadProfile();
   await Promise.all([loadVideos(),loadLiveRooms()]);
 }
 
 async function uploadVideo(){
   if(!currentUser)return showAuth('login');
-  const file=$('#videoFile').files?.[0],title=$('#uploadTitle').value.trim(),description=$('#uploadDescription').value.trim();
+  const file=$('#videoFile')?.files?.[0],title=$('#uploadTitle')?.value.trim(),description=$('#uploadDescription')?.value.trim()||'';
   if(!title)return setMsg('#uploadMsg','Enter a video title.','error');
   if(!file)return setMsg('#uploadMsg','Choose a video file.','error');
   if(file.size>50*1024*1024)return setMsg('#uploadMsg','Video is larger than 50 MB.','error');
@@ -184,45 +245,50 @@ async function startLive(){
       pc.onconnectionstatechange=()=>{if(['failed','closed','disconnected'].includes(pc.connectionState)){pc.close();hostPeers.delete(vid)}};
       const offer=await pc.createOffer();await pc.setLocalDescription(offer);await sendBroadcast(hostChannel,'offer',{target:vid,sdp:pc.localDescription});
     }).on('broadcast',{event:'answer'},async({payload})=>{const pc=hostPeers.get(payload.viewerId);if(pc&&payload.sdp)await pc.setRemoteDescription(payload.sdp)}).on('broadcast',{event:'ice'},async({payload})=>{if(payload.target!=='host')return;const pc=hostPeers.get(payload.viewerId);if(pc&&payload.candidate)try{await pc.addIceCandidate(payload.candidate)}catch{}}).subscribe(status=>{if(status==='SUBSCRIBED'){setMsg('#liveMsg','You are LIVE now. Keep this tab open.','success');$('#goLiveBtn').classList.add('hidden');$('#stopLiveBtn').classList.remove('hidden');loadLiveRooms()}});
-  }catch(err){if(hostStream){hostStream.getTracks().forEach(t=>t.stop());hostStream=null}$('#hostPreview').srcObject=null;setMsg('#liveMsg',err.message||'Could not start live stream.','error');$('#goLiveBtn').disabled=false;}
+  }catch(err){if(hostStream){hostStream.getTracks().forEach(t=>t.stop());hostStream=null}if($('#hostPreview'))$('#hostPreview').srcObject=null;setMsg('#liveMsg',err.message||'Could not start live stream.','error');$('#goLiveBtn').disabled=false;}
 }
 async function stopLive(){
   if(hostRoom&&currentUser)await supabaseClient.from('live_rooms').update({is_live:false,ended_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('user_id',currentUser.id);
   hostPeers.forEach(pc=>pc.close());hostPeers.clear();
   if(hostChannel){await supabaseClient.removeChannel(hostChannel);hostChannel=null}
   if(hostStream){hostStream.getTracks().forEach(t=>t.stop());hostStream=null}
-  hostRoom=null;$('#hostPreview').srcObject=null;$('#goLiveBtn').classList.remove('hidden');$('#goLiveBtn').disabled=false;$('#stopLiveBtn').classList.add('hidden');setMsg('#liveMsg','Live stream ended.');await loadLiveRooms();
+  hostRoom=null;if($('#hostPreview'))$('#hostPreview').srcObject=null;if($('#goLiveBtn')){$('#goLiveBtn').classList.remove('hidden');$('#goLiveBtn').disabled=false}if($('#stopLiveBtn'))$('#stopLiveBtn').classList.add('hidden');setMsg('#liveMsg','Live stream ended.');await loadLiveRooms();
 }
-async function cleanupViewer(){if(viewerPeer){viewerPeer.close();viewerPeer=null}if(viewerChannel){await supabaseClient.removeChannel(viewerChannel);viewerChannel=null}$('#remoteVideo').srcObject=null;viewerId=null}
+async function cleanupViewer(){if(viewerPeer){viewerPeer.close();viewerPeer=null}if(viewerChannel){await supabaseClient.removeChannel(viewerChannel);viewerChannel=null}if($('#remoteVideo'))$('#remoteVideo').srcObject=null;viewerId=null}
 async function watchLive(roomId){
   const room=liveRooms.find(r=>String(r.id)===String(roomId));if(!room)return;
-  await cleanupViewer();$('#watchLiveTitle').textContent=room.title;$('#watchLiveCreator').textContent='Live with '+room.creator_name;setMsg('#watchLiveMsg','Connecting to live stream…');openModal(liveModal);
+  await cleanupViewer();if($('#watchLiveTitle'))$('#watchLiveTitle').textContent=room.title;if($('#watchLiveCreator'))$('#watchLiveCreator').textContent='Live with '+room.creator_name;setMsg('#watchLiveMsg','Connecting to live stream…');openModal(liveModal);
   viewerId=crypto.randomUUID();viewerPeer=new RTCPeerConnection(ICE_CONFIG);
-  viewerPeer.ontrack=e=>{$('#remoteVideo').srcObject=e.streams[0];setMsg('#watchLiveMsg','Connected.','success')};
+  viewerPeer.ontrack=e=>{if($('#remoteVideo'))$('#remoteVideo').srcObject=e.streams[0];setMsg('#watchLiveMsg','Connected.','success')};
   viewerPeer.onicecandidate=e=>{if(e.candidate)sendBroadcast(viewerChannel,'ice',{target:'host',viewerId,candidate:e.candidate.toJSON()})};
   viewerPeer.onconnectionstatechange=()=>{if(viewerPeer&&['failed','disconnected'].includes(viewerPeer.connectionState))setMsg('#watchLiveMsg','Connection interrupted. Refresh and try again.','error')};
   viewerChannel=supabaseClient.channel(`live:${roomId}`);
   viewerChannel.on('broadcast',{event:'offer'},async({payload})=>{if(payload.target!==viewerId||!payload.sdp)return;await viewerPeer.setRemoteDescription(payload.sdp);const answer=await viewerPeer.createAnswer();await viewerPeer.setLocalDescription(answer);await sendBroadcast(viewerChannel,'answer',{viewerId,sdp:viewerPeer.localDescription})}).on('broadcast',{event:'ice'},async({payload})=>{if(payload.target!==viewerId||!payload.candidate)return;try{await viewerPeer.addIceCandidate(payload.candidate)}catch{}}).subscribe(async status=>{if(status==='SUBSCRIBED')await sendBroadcast(viewerChannel,'viewer-ready',{viewerId})});
 }
 
-$('#signupForm').addEventListener('submit',async e=>{e.preventDefault();const name=$('#signupName').value.trim(),email=$('#signupEmail').value.trim(),password=$('#signupPassword').value;if(name.length<2)return setMsg('#signupMsg','Enter your name.','error');if(password.length<8)return setMsg('#signupMsg','Password must be at least 8 characters.','error');setMsg('#signupMsg','Creating account…');const {data,error}=await supabaseClient.auth.signUp({email,password,options:{data:{full_name:name},emailRedirectTo:location.origin+location.pathname}});if(error)return setMsg('#signupMsg',error.message,'error');if(data.session){setMsg('#signupMsg','Account created and signed in.','success');setTimeout(async()=>{closeModal(authModal);await refreshAuthUI()},400)}else setMsg('#signupMsg','Account created. Check your email, verify it, then log in.','success')});
-$('#loginForm').addEventListener('submit',async e=>{e.preventDefault();setMsg('#loginMsg','Signing in…');const {error}=await supabaseClient.auth.signInWithPassword({email:$('#loginEmail').value.trim(),password:$('#loginPassword').value});if(error)return setMsg('#loginMsg',error.message,'error');setMsg('#loginMsg','Login successful.','success');setTimeout(async()=>{closeModal(authModal);await refreshAuthUI()},300)});
-$('#resetBtn').onclick=async()=>{const email=$('#loginEmail').value.trim();if(!email)return setMsg('#loginMsg','Enter your email first.','error');const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});setMsg('#loginMsg',error?error.message:'Password reset email sent.',error?'error':'success')};
-$('#logoutBtn').onclick=async()=>{await stopLive();await supabaseClient.auth.signOut();await refreshAuthUI()};
-$('#startBtn').onclick=()=>currentUser?openModal(studioModal):showAuth('signup');
-$('#browseBtn').onclick=()=>$('#videosSection').scrollIntoView({behavior:'smooth'});
-$('#previewPlay').onclick=()=>currentUser?openModal(studioModal):showAuth('signup');
-$('#studioBtn').onclick=()=>openModal(studioModal);
-$('#accountBtn').onclick=()=>$('#accountSection').scrollIntoView({behavior:'smooth'});
-$('#uploadBtn').onclick=uploadVideo;$('#goLiveBtn').onclick=startLive;$('#stopLiveBtn').onclick=stopLive;$('#refreshLive').onclick=loadLiveRooms;$('#refreshVideos').onclick=loadVideos;
+if($('#signupForm'))$('#signupForm').addEventListener('submit',async e=>{e.preventDefault();const name=$('#signupName').value.trim(),email=$('#signupEmail').value.trim(),password=$('#signupPassword').value;if(name.length<2)return setMsg('#signupMsg','Enter your name.','error');if(password.length<8)return setMsg('#signupMsg','Password must be at least 8 characters.','error');setMsg('#signupMsg','Creating account…');const {data,error}=await supabaseClient.auth.signUp({email,password,options:{data:{full_name:name},emailRedirectTo:location.origin+location.pathname}});if(error)return setMsg('#signupMsg',error.message,'error');if(data.session){setMsg('#signupMsg','Account created and signed in.','success');setTimeout(async()=>{closeModal(authModal);await refreshAuthUI()},400)}else setMsg('#signupMsg','Account created. Check your email, verify it, then log in.','success')});
+if($('#loginForm'))$('#loginForm').addEventListener('submit',async e=>{e.preventDefault();setMsg('#loginMsg','Signing in…');const {error}=await supabaseClient.auth.signInWithPassword({email:$('#loginEmail').value.trim(),password:$('#loginPassword').value});if(error)return setMsg('#loginMsg',error.message,'error');setMsg('#loginMsg','Login successful.','success');setTimeout(async()=>{closeModal(authModal);await refreshAuthUI()},300)});
+if($('#resetBtn'))$('#resetBtn').onclick=async()=>{const email=$('#loginEmail').value.trim();if(!email)return setMsg('#loginMsg','Enter your email first.','error');const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});setMsg('#loginMsg',error?error.message:'Password reset email sent.',error?'error':'success')};
+if($('#logoutBtn'))$('#logoutBtn').onclick=async()=>{await stopLive();await supabaseClient.auth.signOut();await refreshAuthUI()};
+if($('#startBtn'))$('#startBtn').onclick=()=>currentUser?openModal(studioModal):showAuth('signup');
+if($('#browseBtn'))$('#browseBtn').onclick=()=>$('#videosSection')?.scrollIntoView({behavior:'smooth'});
+if($('#previewPlay'))$('#previewPlay').onclick=()=>currentUser?openModal(studioModal):showAuth('signup');
+if($('#studioBtn'))$('#studioBtn').onclick=()=>openModal(studioModal);
+if($('#accountBtn'))$('#accountBtn').onclick=()=>$('#accountSection')?.scrollIntoView({behavior:'smooth'});
+if($('#uploadBtn'))$('#uploadBtn').onclick=uploadVideo;
+if($('#goLiveBtn'))$('#goLiveBtn').onclick=startLive;
+if($('#stopLiveBtn'))$('#stopLiveBtn').onclick=stopLive;
+if($('#refreshLive'))$('#refreshLive').onclick=loadLiveRooms;
+if($('#refreshVideos'))$('#refreshVideos').onclick=loadVideos;
 $$('[data-auth]').forEach(b=>b.onclick=()=>showAuth(b.dataset.auth));
 $$('[data-tab]').forEach(b=>b.onclick=()=>setAuthTab(b.dataset.tab));
 $$('[data-close="auth"]').forEach(b=>b.onclick=()=>closeModal(authModal));
 $$('[data-close="studio"]').forEach(b=>b.onclick=()=>closeModal(studioModal));
 $$('[data-close="video"]').forEach(b=>b.onclick=()=>{closeModal(videoModal);resetVideoPlayer()});
 $$('[data-close="live"]').forEach(b=>b.onclick=async()=>{closeModal(liveModal);await cleanupViewer()});
-[authModal,studioModal,videoModal,liveModal].forEach(m=>m.addEventListener('click',async e=>{if(e.target!==m)return;closeModal(m);if(m===videoModal)resetVideoPlayer();if(m===liveModal)await cleanupViewer()}));
+[authModal,studioModal,videoModal,liveModal].filter(Boolean).forEach(m=>m.addEventListener('click',async e=>{if(e.target!==m)return;closeModal(m);if(m===videoModal)resetVideoPlayer();if(m===liveModal)await cleanupViewer()}));
 supabaseClient.auth.onAuthStateChange(()=>setTimeout(refreshAuthUI,0));
 window.addEventListener('beforeunload',()=>{if(hostRoom&&currentUser)supabaseClient.from('live_rooms').update({is_live:false,ended_at:new Date().toISOString()}).eq('user_id',currentUser.id)});
-if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js?v=6').then(r=>r.update()).catch(()=>{}));
+setFooter();
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js?v=7').then(r=>r.update()).catch(()=>{}));
 refreshAuthUI();setInterval(loadLiveRooms,15000);
