@@ -26,7 +26,7 @@
 <div class="modal" id="studioModal"><div class="box large"><button class="close" data-close="studio">×</button><h2>Creator Studio</h2><div class="sub">Upload a video or broadcast live from this device.</div><div class="studio-grid"><div class="panel"><h3>Upload video</h3><div class="field"><label>Video title</label><input id="uploadTitle" maxlength="120" placeholder="My new video"></div><div class="field"><label>Description</label><textarea id="uploadDescription" maxlength="600" placeholder="Tell viewers about this video"></textarea></div><div class="field"><label>Video file (MP4/WebM/MOV, max 50 MB)</label><input id="videoFile" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v"></div><div class="msg" id="uploadMsg"></div><div class="progress hidden" id="uploadProgress"><span></span></div><button class="btn primary full" id="uploadBtn">Upload & publish</button></div><div class="panel"><h3>Go live</h3><div class="field"><label>Live title</label><input id="liveTitle" maxlength="120" placeholder="Live with me"></div><video id="hostPreview" class="video-player" autoplay muted playsinline></video><div class="msg" id="liveMsg"></div><button class="btn livebtn full" id="goLiveBtn">Start camera & go live</button><button class="btn full hidden" id="stopLiveBtn" style="margin-top:8px">End live stream</button></div></div></div></div>
 <div class="modal" id="videoModal"><div class="box large"><button class="close" data-close="video">×</button><h2 id="videoTitle">Video</h2><div class="sub" id="videoCreator"></div><video id="videoPlayer" class="video-player" controls controlsList="nodownload noremoteplayback" disablePictureInPicture playsinline preload="metadata" oncontextmenu="return false"></video><div class="msg" id="videoStatus"></div></div></div>
 <div class="modal" id="liveModal"><div class="box large"><button class="close" data-close="live">×</button><h2 id="watchLiveTitle">Live stream</h2><div class="sub" id="watchLiveCreator">Connecting…</div><video id="remoteVideo" class="video-player" autoplay controls playsinline></video><div class="msg" id="watchLiveMsg"></div></div></div>
-<div class="modal" id="sponsorGate"><div class="box sponsor-box"><span class="sponsor-label">SPONSORED LINK</span><h2>Continue to LiveLens</h2><div class="countdown" id="sponsorCount">3</div><p class="sponsor-note" id="sponsorText">Please wait a moment. The sponsor button will be available shortly.</p><button class="btn primary full" id="sponsorBtn" type="button" disabled>Continue / Open Sponsor</button><button class="btn ghost full" id="sponsorSkip" type="button" style="margin-top:8px">Continue without sponsor</button></div></div>
+<div class="modal" id="sponsorGate"><div class="box sponsor-box"><span class="sponsor-label">SPONSORED LINK</span><h2>Continue to LiveLens</h2><div class="countdown" id="sponsorCount">3</div><p class="sponsor-note" id="sponsorText">Please wait a moment. The sponsor button will be available shortly.</p><button class="btn primary full" id="sponsorBtn" type="button" disabled>Continue / Open Sponsor</button></div></div>
 <div class="footer"><div class="wrap">2026 by <strong>livelens</strong>. All Rights Reserved.</div></div>
 <script>
 (function(){
@@ -35,7 +35,6 @@
   const count=document.getElementById('sponsorCount');
   const text=document.getElementById('sponsorText');
   const btn=document.getElementById('sponsorBtn');
-  const skip=document.getElementById('sponsorSkip');
   if(!gate||!btn)return;
   if(sessionStorage.getItem('livelensSponsorShown')==='1')return;
   gate.classList.add('show');
@@ -51,7 +50,6 @@
   },1000);
   function closeGate(){sessionStorage.setItem('livelensSponsorShown','1');gate.classList.remove('show');}
   btn.addEventListener('click',function(){if(btn.disabled)return;window.open(sponsorUrl,'_blank','noopener,noreferrer');closeGate();});
-  skip.addEventListener('click',closeGate);
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
