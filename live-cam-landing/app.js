@@ -12,7 +12,7 @@ const ICE_CONFIG={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:
 function openModal(m){if(m)m.classList.add('show')}
 function closeModal(m){if(m)m.classList.remove('show')}
 function setMsg(sel,text,type=''){const el=$(sel);if(!el)return;el.textContent=text;el.className='msg '+type}
-function safe(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function safe(v){return String(v??'').replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]))}
 function setAuthTab(mode){
   $$('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===mode));
   $('#signupForm').classList.toggle('hidden',mode!=='signup');
@@ -26,6 +26,20 @@ function showAuth(mode='signup'){setAuthTab(mode);openModal(authModal)}
 function setFooter(){
   const footer=$('.footer .wrap');
   if(footer)footer.innerHTML='2026 by <strong>livelens</strong>. All Rights Reserved.';
+}
+
+function protectVideoPlayers(root=document){
+  root.querySelectorAll('video').forEach(video=>{
+    video.setAttribute('controlsList','nodownload noremoteplayback');
+    video.setAttribute('disablePictureInPicture','');
+    video.disablePictureInPicture=true;
+    if(!video.dataset.downloadProtected){
+      video.dataset.downloadProtected='1';
+      video.addEventListener('contextmenu',e=>e.preventDefault());
+      video.addEventListener('dragstart',e=>e.preventDefault());
+    }
+  });
+  root.querySelectorAll('#openOriginalVideo,a[href*="/storage/v1/object/public/videos/"]').forEach(link=>link.remove());
 }
 
 async function loadProfile(){
@@ -60,7 +74,7 @@ function renderVideos(){
     const ownerActions=mine?`<button class="btn ghost full" style="border-color:#ff4d6d;color:#ff9caf" data-delete-video="${safe(v.id)}">Delete video</button>`:'';
     return `<article class="card">
       <div class="thumb" style="height:auto;aspect-ratio:16/9;background:#000">
-        <video data-inline-video="${safe(v.id)}" src="${safe(url)}" controls preload="metadata" playsinline style="width:100%;height:100%;object-fit:contain;background:#000"></video>
+        <video data-inline-video="${safe(v.id)}" src="${safe(url)}" controls controlsList="nodownload noremoteplayback" disablePictureInPicture preload="metadata" playsinline oncontextmenu="return false" style="width:100%;height:100%;object-fit:contain;background:#000"></video>
       </div>
       <div class="card-body">
         <div class="creator">${safe(v.creator_name)}</div>
@@ -68,7 +82,6 @@ function renderVideos(){
         <p>${safe((v.description||'').slice(0,140))}</p>
         <div style="display:grid;gap:8px">
           <button class="btn primary full" data-play-video="${safe(v.id)}">Open player</button>
-          <a class="btn full" style="text-decoration:none;text-align:center" href="${safe(url)}" target="_blank" rel="noopener">Open original video</a>
           ${ownerActions}
         </div>
       </div>
@@ -84,10 +97,11 @@ function renderVideos(){
       const msg=document.createElement('div');
       msg.className='video-card-error';
       msg.style.cssText='padding:9px 12px;color:#ffb1bf;font-size:12px;background:#ff4d6d17';
-      msg.textContent='This browser could not play the file here. Use “Open original video” below.';
+      msg.textContent='This browser could not play this video.';
       video.parentElement.insertAdjacentElement('afterend',msg);
     });
   });
+  protectVideoPlayers(el);
 }
 
 async function deleteVideo(id,button){
@@ -134,7 +148,11 @@ function attachPlayerSource(v,src){
   source.src=src;
   source.type=v.mime_type||'video/mp4';
   player.appendChild(source);
+  player.setAttribute('controlsList','nodownload noremoteplayback');
+  player.setAttribute('disablePictureInPicture','');
+  player.disablePictureInPicture=true;
   player.load();
+  protectVideoPlayers();
 }
 
 async function blobPlaybackFallback(v,publicUrl){
@@ -150,7 +168,7 @@ async function blobPlaybackFallback(v,publicUrl){
     attachPlayerSource(v,activeVideoBlobUrl);
     player.play().catch(()=>{});
   }catch(err){
-    setMsg('#videoStatus',`${err.message||'Video could not be loaded.'} Use “Open original video”.`,'error');
+    setMsg('#videoStatus',err.message||'Video could not be loaded.','error');
   }
 }
 
@@ -159,17 +177,16 @@ function openUploadedVideo(id){
   if(!v)return;
   const publicUrl=videoUrl(v.storage_path);
   const player=$('#videoPlayer');
-  if(!videoModal||!player){window.open(publicUrl,'_blank','noopener');return;}
+  if(!videoModal||!player)return alert('Video player is unavailable. Please refresh and try again.');
   resetVideoPlayer();
   if($('#videoTitle'))$('#videoTitle').textContent=v.title;
   if($('#videoCreator'))$('#videoCreator').textContent='By '+v.creator_name;
-  if($('#openOriginalVideo'))$('#openOriginalVideo').href=publicUrl;
   setMsg('#videoStatus','Loading video…');
   player.onloadedmetadata=()=>setMsg('#videoStatus','Video ready. Press Play.','success');
   player.oncanplay=()=>setMsg('#videoStatus','Video ready. Press Play.','success');
   player.onerror=async()=>{
     if(player.dataset.fallbackTried==='1'){
-      setMsg('#videoStatus','This browser cannot play this file here. Use “Open original video”.','error');
+      setMsg('#videoStatus','This browser cannot play this video format.','error');
       return;
     }
     player.dataset.fallbackTried='1';
@@ -205,6 +222,7 @@ async function refreshAuthUI(){
   }
   if(signed)await loadProfile();
   await Promise.all([loadVideos(),loadLiveRooms()]);
+  protectVideoPlayers();
 }
 
 async function uploadVideo(){
@@ -289,6 +307,9 @@ $$('[data-close="live"]').forEach(b=>b.onclick=async()=>{closeModal(liveModal);a
 [authModal,studioModal,videoModal,liveModal].filter(Boolean).forEach(m=>m.addEventListener('click',async e=>{if(e.target!==m)return;closeModal(m);if(m===videoModal)resetVideoPlayer();if(m===liveModal)await cleanupViewer()}));
 supabaseClient.auth.onAuthStateChange(()=>setTimeout(refreshAuthUI,0));
 window.addEventListener('beforeunload',()=>{if(hostRoom&&currentUser)supabaseClient.from('live_rooms').update({is_live:false,ended_at:new Date().toISOString()}).eq('user_id',currentUser.id)});
+const videoProtectionObserver=new MutationObserver(()=>protectVideoPlayers());
+videoProtectionObserver.observe(document.documentElement,{childList:true,subtree:true});
 setFooter();
-if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js?v=7').then(r=>r.update()).catch(()=>{}));
+protectVideoPlayers();
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js?v=8').then(r=>r.update()).catch(()=>{}));
 refreshAuthUI();setInterval(loadLiveRooms,15000);
